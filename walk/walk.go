@@ -18,7 +18,6 @@ limitations under the License.
 package walk
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -124,10 +123,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 	visit = func(c *config.Config, dir, rel string, updateParent bool) {
 		haveError := false
 
-		// TODO: OPT: ReadDir stats all the files, which is slow. We just care about
-		// names and modes, so we should use something like
-		// golang.org/x/tools/internal/fastwalk to speed this up.
-		files, err := ioutil.ReadDir(dir)
+		files, err := os.ReadDir(dir)
 		if err != nil {
 			log.Print(err)
 			return
@@ -158,7 +154,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 			case base == "" || wc.isExcluded(rel, base):
 				continue
 
-			case fi.IsDir() || fi.Mode()&os.ModeSymlink != 0 && symlinks.follow(c, dir, rel, base):
+			case fi.IsDir() || fi.Type()&os.ModeSymlink != 0 && symlinks.follow(c, dir, rel, base):
 				subdirs = append(subdirs, base)
 
 			default:
@@ -254,13 +250,13 @@ func shouldVisit(rel string, mode Mode, updateParent bool, updateRels map[string
 	}
 }
 
-func loadBuildFile(c *config.Config, pkg, dir string, files []os.FileInfo) (*rule.File, error) {
+func loadBuildFile(c *config.Config, pkg, dir string, files []os.DirEntry) (*rule.File, error) {
 	var err error
 	readDir := dir
 	readFiles := files
 	if c.ReadBuildFilesDir != "" {
 		readDir = filepath.Join(c.ReadBuildFilesDir, filepath.FromSlash(pkg))
-		readFiles, err = ioutil.ReadDir(readDir)
+		readFiles, err = os.ReadDir(readDir)
 		if err != nil {
 			return nil, err
 		}

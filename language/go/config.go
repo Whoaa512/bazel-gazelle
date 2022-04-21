@@ -744,7 +744,7 @@ func detectNamingConvention(c *config.Config, rootFile *rule.File) namingConvent
 		}
 	}
 
-	infos, err := ioutil.ReadDir(c.RepoRoot)
+	infos, err := os.ReadDir(c.RepoRoot)
 	if err != nil {
 		return importNamingConvention
 	}

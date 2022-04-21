@@ -542,7 +542,7 @@ func findOutputPath(c *config.Config, f *rule.File) string {
 	}
 	outputDir := filepath.Join(baseDir, filepath.FromSlash(f.Pkg))
 	defaultOutputPath := filepath.Join(outputDir, c.DefaultBuildFileName())
-	files, err := ioutil.ReadDir(outputDir)
+	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		// Ignore error. Directory probably doesn't exist.
 		return defaultOutputPath

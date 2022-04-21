@@ -257,7 +257,7 @@ func scanExprs(defName string, stmt []bzl.Expr) (rules []*Rule, loads []*Load, f
 // If there is at least one matching file, a path will be returned by joining
 // dir and the first matching name. If there are no matching files, the
 // empty string is returned.
-func MatchBuildFileName(dir string, names []string, files []os.FileInfo) string {
+func MatchBuildFileName(dir string, names []string, files []os.DirEntry) string {
 	for _, name := range names {
 		for _, fi := range files {
 			if fi.Name() == name && !fi.IsDir() {
