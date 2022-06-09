@@ -143,7 +143,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 		}
 
 		c = configure(cexts, knownDirectives, c, rel, f)
-		wc := getWalkConfig(c)
+		wc := GetWalkConfig(c)
 
 		if wc.isExcluded(rel, ".") {
 			return
@@ -170,7 +170,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 			}
 		}
 
-		update := !haveError && !wc.ignore && shouldUpdate
+		update := !haveError && !wc.Ignore && shouldUpdate
 		if shouldCall(rel, mode, updateParent, updateRels) {
 			genFiles := findGenFiles(wc, f)
 			wf(dir, rel, c, update, f, subdirs, regularFiles, genFiles)
@@ -291,7 +291,7 @@ func configure(cexts []config.Configurer, knownDirectives map[string]bool, c *co
 	return c
 }
 
-func findGenFiles(wc *walkConfig, f *rule.File) []string {
+func findGenFiles(wc *WalkConfig, f *rule.File) []string {
 	if f == nil {
 		return nil
 	}
@@ -315,7 +315,7 @@ func findGenFiles(wc *walkConfig, f *rule.File) []string {
 	return genFiles
 }
 
-func resolveFileInfo(wc *walkConfig, dir, rel string, fi fs.FileInfo) fs.FileInfo {
+func resolveFileInfo(wc *WalkConfig, dir, rel string, fi fs.FileInfo) fs.FileInfo {
 	base := fi.Name()
 	if base == "" || wc.isExcluded(rel, base) {
 		return nil
