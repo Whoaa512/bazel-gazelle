@@ -145,7 +145,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 		}
 
 		c = configure(cexts, knownDirectives, c, rel, f)
-		wc := getWalkConfig(c)
+		wc := GetWalkConfig(c)
 
 		if wc.isExcluded(rel, ".") {
 			return
@@ -173,7 +173,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 			}
 		}
 
-		update := !haveError && !wc.ignore && shouldUpdate
+		update := !haveError && !wc.Ignore && shouldUpdate
 		if shouldCall(rel, mode, updateParent, updateRels) {
 			genFiles := findGenFiles(wc, f)
 			wf(dir, rel, c, update, f, subdirs, regularFiles, genFiles)
@@ -294,7 +294,7 @@ func configure(cexts []config.Configurer, knownDirectives map[string]bool, c *co
 	return c
 }
 
-func findGenFiles(wc *walkConfig, f *rule.File) []string {
+func findGenFiles(wc *WalkConfig, f *rule.File) []string {
 	if f == nil {
 		return nil
 	}
@@ -331,7 +331,7 @@ func (r *symlinkResolver) follow(c *config.Config, dir, rel, base string) bool {
 	}
 
 	// See if the user has explicitly directed us to follow the link.
-	wc := getWalkConfig(c)
+	wc := GetWalkConfig(c)
 	linkRel := path.Join(rel, base)
 	for _, follow := range wc.follow {
 		if linkRel == follow {

@@ -38,20 +38,20 @@ import (
 // may be set in one directory and used in another. Excludes work on
 // declared generated files, so we can't just stat.
 
-type walkConfig struct {
+type WalkConfig struct {
 	excludes []string
-	ignore   bool
+	Ignore   bool
 	follow   []string
 	loadOnce sync.Once
 }
 
 const walkName = "_walk"
 
-func getWalkConfig(c *config.Config) *walkConfig {
-	return c.Exts[walkName].(*walkConfig)
+func GetWalkConfig(c *config.Config) *WalkConfig {
+	return c.Exts[walkName].(*WalkConfig)
 }
 
-func (wc *walkConfig) isExcluded(rel, base string) bool {
+func (wc *WalkConfig) isExcluded(rel, base string) bool {
 	if base == ".git" {
 		return true
 	}
@@ -75,7 +75,7 @@ func (wc *walkConfig) isExcluded(rel, base string) bool {
 type Configurer struct{}
 
 func (*Configurer) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {
-	wc := &walkConfig{}
+	wc := &WalkConfig{}
 	c.Exts[walkName] = wc
 	fs.Var(&gzflag.MultiFlag{Values: &wc.excludes}, "exclude", "pattern that should be ignored (may be repeated)")
 }
@@ -87,10 +87,10 @@ func (*Configurer) KnownDirectives() []string {
 }
 
 func (cr *Configurer) Configure(c *config.Config, rel string, f *rule.File) {
-	wc := getWalkConfig(c)
-	wcCopy := &walkConfig{}
+	wc := GetWalkConfig(c)
+	wcCopy := &WalkConfig{}
 	*wcCopy = *wc
-	wcCopy.ignore = false
+	wcCopy.Ignore = false
 
 	wc.loadOnce.Do(func() {
 		if err := cr.loadBazelIgnore(c.RepoRoot, wcCopy); err != nil {
@@ -110,7 +110,7 @@ func (cr *Configurer) Configure(c *config.Config, rel string, f *rule.File) {
 			case "follow":
 				wcCopy.follow = append(wcCopy.follow, path.Join(rel, d.Value))
 			case "ignore":
-				wcCopy.ignore = true
+				wcCopy.Ignore = true
 			}
 		}
 	}
@@ -118,7 +118,7 @@ func (cr *Configurer) Configure(c *config.Config, rel string, f *rule.File) {
 	c.Exts[walkName] = wcCopy
 }
 
-func (c *Configurer) loadBazelIgnore(repoRoot string, wc *walkConfig) error {
+func (c *Configurer) loadBazelIgnore(repoRoot string, wc *WalkConfig) error {
 	ignorePath := path.Join(repoRoot, ".bazelignore")
 	file, err := os.Open(ignorePath)
 	if errors.Is(err, fs.ErrNotExist) {
