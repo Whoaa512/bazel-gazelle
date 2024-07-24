@@ -19,11 +19,36 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"sort"
+	"strings"
 
 	bzl "github.com/bazelbuild/buildtools/build"
 )
 
+var ShouldLog = false
+
+func init() {
+	d, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if strings.Contains(d, "select") {
+		ShouldLog = true
+	}
+}
+
+func Debug(format string, args ...interface{}) {
+	if ShouldLog {
+		fmt.Printf(format+"\n", args...)
+	}
+}
+
+func DebugCond(cond bool, msg string, args ...any) {
+	if cond {
+		Debug(msg, args...)
+	}
+}
 // MergeRules copies information from src into dst, usually discarding
 // information in dst when they have the same attributes.
 //
@@ -110,12 +135,16 @@ func mergeAttrValues(srcAttr, dstAttr *attrValue) (bzl.Expr, error) {
 	}
 
 	if _, ok := dstAttr.val.(Merger); srcAttr == nil && ok {
+		Debug("warning: src was nil but dst implements Merger. dropping dst")
 		return nil, nil
 	}
 
 	if srcAttr != nil {
 		if srcMerger, ok := srcAttr.val.(Merger); ok {
-			return srcMerger.Merge(dst), nil
+			val := srcMerger.Merge(dst)
+			Debug("src is a Merger %+v", srcAttr.val)
+			Debug("Merged to %+v", val)
+			return val, nil
 		}
 	}
 	var srcExprs platformStringsExprs

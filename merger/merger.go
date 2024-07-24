@@ -135,8 +135,11 @@ func MergeFile(oldFile *rule.File, emptyRules, genRules []*rule.Rule, phase Phas
 	matchErrors := make([]error, len(genRules))
 	substitutions := make(map[string]string)
 	for i, genRule := range genRules {
+		cond := genRule.Name() == "mutli-arch"
+		rule.DebugCond(cond, "matching rule %s", genRule.Name())
 		oldRule, err := Match(oldFile.Rules, genRule, kinds[genRule.Kind()])
 		if err != nil {
+			rule.DebugCond(cond, "err on match %v", err)
 			// TODO(jayconrod): add a verbose mode and log errors. They are too chatty
 			// to print by default.
 			matchErrors[i] = err
@@ -159,17 +162,24 @@ func MergeFile(oldFile *rule.File, emptyRules, genRules []*rule.Rule, phase Phas
 
 	// Merge generated rules with existing rules or append to the end of the file.
 	for i, genRule := range genRules {
+		cond := genRule.Name() == "mutli-arch"
+		rule.DebugCond(cond, "merging rule %s", genRule.Name())
 		if matchErrors[i] != nil {
 			continue
 		}
 		if matchRules[i] == nil {
+			rule.DebugCond(cond, "no old match found")
 			if index, ok := genRule.PrivateAttr(UnstableInsertIndexKey).(int); ok {
 				genRule.InsertAt(oldFile, index)
 			} else {
 				genRule.Insert(oldFile)
 			}
 		} else {
+			rule.DebugCond(cond, "run actual merge")
+			rule.DebugCond(cond, "old %+v", matchRules[i])
+			rule.DebugCond(cond, "new %+v", genRule)
 			rule.MergeRules(genRule, matchRules[i], getMergeAttrs(genRule), oldFile.Path)
+			rule.DebugCond(cond, "merged %+v", genRule)
 		}
 	}
 }

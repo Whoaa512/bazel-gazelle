@@ -364,6 +364,7 @@ Run %s to update BUILD.out and expected{Stdout,Stderr,ExitCode}.txt files.
 				config.Stderr, actualStderr,
 			))
 		}
+		CheckFiles(t, testdataDir, goldens)
 		if len(errs) > 0 {
 			for _, err := range errs {
 				t.Log(err)
@@ -371,7 +372,7 @@ Run %s to update BUILD.out and expected{Stdout,Stderr,ExitCode}.txt files.
 			t.FailNow()
 		}
 
-		CheckFiles(t, testdataDir, goldens)
+		// CheckFiles(t, testdataDir, goldens)
 	})
 }
 

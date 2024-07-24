@@ -383,6 +383,7 @@ func runFixUpdate(wd string, cmd command, args []string) (err error) {
 				r.Insert(f)
 			}
 		} else {
+			rule.Debug("pre-resolve merge of %s", f.File.Path)
 			merger.MergeFile(f, empty, gen, merger.PreResolve,
 				unionKindInfoMaps(kinds, mappedKindInfo))
 		}
@@ -434,18 +435,26 @@ func runFixUpdate(wd string, cmd command, args []string) (err error) {
 			err = cerr
 		}
 	}()
+	rule.Debug("~~~~~~~~~~~~~~~~~~~~~~~")
+	rule.Debug("Time to resolve then merge")
+	rule.Debug("~~~~~~~~~~~~~~~~~~~~~~~")
 	if err := maybePopulateRemoteCacheFromGoMod(c, rc); err != nil {
 		log.Print(err)
 	}
 	for _, v := range visits {
 		for i, r := range v.rules {
 			from := label.New(c.RepoName, v.pkgRel, r.Name())
+			cond := strings.Contains(from.String(), "multi-arch")
 			if rslv := mrslv.Resolver(r, v.pkgRel); rslv != nil {
+				rule.DebugCond(cond, "resolving %s", from)
+				rule.DebugCond(cond, "rule %+v", r)
 				rslv.Resolve(v.c, ruleIndex, rc, r, v.imports[i], from)
 			}
 		}
+		rule.Debug("post-resolve merging file %s", v.file.Path)
 		merger.MergeFile(v.file, v.empty, v.rules, merger.PostResolve,
 			unionKindInfoMaps(kinds, v.mappedKindInfo))
+		rule.Debug("~~~~~~~~~~~~~~~~~~~~~~~")
 	}
 	for _, lang := range languages {
 		if life, ok := lang.(language.LifecycleManager); ok {
