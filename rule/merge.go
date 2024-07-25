@@ -152,8 +152,8 @@ func mergeAttrValues(srcAttr, dstAttr *attrValue) (bzl.Expr, error) {
 	if srcAttr != nil {
 		if srcMerger, ok := srcAttr.val.(Merger); ok {
 			val := srcMerger.Merge(dst)
-			Debug("src is a Merger %+v", srcAttr.val)
-			Debug("Merged to %+v", val)
+			Debug("src is a Merger %#v", srcAttr.val)
+			Debug("Merged to %#v", val)
 			return val, nil
 		}
 	}

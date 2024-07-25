@@ -176,10 +176,10 @@ func MergeFile(oldFile *rule.File, emptyRules, genRules []*rule.Rule, phase Phas
 			}
 		} else {
 			rule.DebugCond(cond, "run actual merge")
-			rule.DebugCond(cond, "old %+v", matchRules[i])
-			rule.DebugCond(cond, "new %+v", genRule)
+			rule.DebugCond(cond, "old %v", rule.Dump(matchRules[i]))
+			rule.DebugCond(cond, "new %v", rule.Dump(genRule))
 			rule.MergeRules(genRule, matchRules[i], getMergeAttrs(genRule), oldFile.Path)
-			rule.DebugCond(cond, "merged %+v", genRule)
+			rule.DebugCond(cond, "merged %v", rule.Dump(genRule))
 		}
 	}
 }

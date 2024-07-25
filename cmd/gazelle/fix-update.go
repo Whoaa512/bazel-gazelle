@@ -447,7 +447,7 @@ func runFixUpdate(wd string, cmd command, args []string) (err error) {
 			cond := strings.Contains(from.String(), "multi-arch")
 			if rslv := mrslv.Resolver(r, v.pkgRel); rslv != nil {
 				rule.DebugCond(cond, "resolving %s", from)
-				rule.DebugCond(cond, "rule %+v", r)
+				rule.DebugCond(cond, "rule %#v", r)
 				rslv.Resolve(v.c, ruleIndex, rc, r, v.imports[i], from)
 			}
 		}
