@@ -43,6 +43,8 @@ func init() {
 	if strings.Contains(d, "select") {
 		ShouldLog = true
 	}
+
+	Config.MaxDepth = 1
 }
 
 func Debug(format string, args ...interface{}) {
