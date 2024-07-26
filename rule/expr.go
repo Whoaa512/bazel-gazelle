@@ -276,6 +276,7 @@ func extractPlatformStringsExprs(expr bzl.Expr) (platformStringsExprs, error) {
 					break
 				}
 				osArch := strings.Split(key.Name, "_")
+				Debug("osArch: %v", osArch)
 				if len(osArch) != 2 || !KnownOSSet[osArch[0]] || !KnownArchSet[osArch[1]] {
 					return platformStringsExprs{}, fmt.Errorf("expression could not be matched: dict key contains unknown platform: %q", k.Value)
 				}

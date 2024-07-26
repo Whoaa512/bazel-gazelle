@@ -902,6 +902,7 @@ func (r *Rule) SetAttr(key string, value interface{}) {
 	if attr, ok := r.attrs[key]; ok {
 		attr.expr.RHS = rhs
 		attr.val = value
+		r.attrs[key] = attr
 	} else {
 		r.attrs[key] = attrValue{
 			expr: &bzl.AssignExpr{
@@ -1082,4 +1083,10 @@ func checkFile(f *File) error {
 		names[name] = true
 	}
 	return nil
+}
+
+// ExprStr is a debugging function that returns the string representation of
+// the expression within the rule.
+func (r *Rule) ExprStr() string {
+	return bzl.FormatString(r.expr)
 }

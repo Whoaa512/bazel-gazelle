@@ -78,19 +78,29 @@ func DebugCond(cond bool, msg string, args ...any) {
 // marked with a "# keep" comment, values in the attribute not marked with
 // a "# keep" comment will be dropped. If the attribute is empty afterward,
 // it will be deleted.
+
+// onlyInDst := key in dst && key not in src
+// if onlyInDst && (isMergeable(key) && !ShouldKeep(dst[key])):
+//   delete dst[key]
+
 func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
 	if dst.ShouldKeep() {
 		return
 	}
 
 	// Process attributes that are in dst but not in src.
+	// Debug("~~~Merging %s into %s", src.Name(), dst.Name())
 	for key, dstAttr := range dst.attrs {
 		if _, ok := src.attrs[key]; ok || !mergeable[key] || ShouldKeep(dstAttr.expr) {
 			continue
 		}
+		// if attr not in src, and attr is mergeable, and attr is not marked with # keep
+		// then delete the attr from dst
+		
 		if mergedValue, err := mergeAttrValues(nil, &dstAttr); err != nil {
 			start, end := dstAttr.expr.RHS.Span()
-			log.Printf("%s:%d.%d-%d.%d: could not merge expression", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+			log.Printf("%s:%d.%d-%d.%d: could not merge expression wat", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+			log.Printf("%v", err)
 		} else if mergedValue == nil {
 			dst.DelAttr(key)
 		} else {
@@ -105,7 +115,7 @@ func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
 		} else if mergeable[key] && !ShouldKeep(dstAttr.expr) {
 			if mergedValue, err := mergeAttrValues(&srcAttr, &dstAttr); err != nil {
 				start, end := dstAttr.expr.RHS.Span()
-				log.Printf("%s:%d.%d-%d.%d: could not merge expression", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+				log.Printf("%s:%d.%d-%d.%d: could not merge expression foo", filename, start.Line, start.LineRune, end.Line, end.LineRune)
 			} else if mergedValue == nil {
 				dst.DelAttr(key)
 			} else {
@@ -138,6 +148,26 @@ func mergeAttrValues(srcAttr, dstAttr *attrValue) (bzl.Expr, error) {
 	if ShouldKeep(dstAttr.expr.RHS) {
 		return nil, nil
 	}
+	var dstHasMerger bool
+	var srcHasMerger bool
+	var dstVal any
+	var srcVal any
+	if dstAttr != nil {
+		_, dstHasMerger = dstAttr.val.(Merger)
+		dstVal = dstAttr.val
+	}
+	if srcAttr != nil {
+		_, srcHasMerger = srcAttr.val.(Merger)
+		srcVal = srcAttr.val
+	}
+	Debug("src has merger: %v", srcHasMerger)
+	Debug("dst has merger: %v", dstHasMerger)
+	if !srcHasMerger && !dstHasMerger {
+		Debug("src and dst do not have mergers")
+		Debug("src: %v", Dump(srcVal))
+		Debug("dst: %v", Dump(dstVal))
+	}
+
 	dst := dstAttr.expr.RHS
 	if srcAttr == nil && (dst == nil || isScalar(dst)) {
 		return nil, nil
@@ -148,6 +178,8 @@ func mergeAttrValues(srcAttr, dstAttr *attrValue) (bzl.Expr, error) {
 
 	if _, ok := dstAttr.val.(Merger); srcAttr == nil && ok {
 		Debug("warning: src was nil but dst implements Merger. dropping dst")
+		// val := dstAttr.val.(Merger).Merge(nil)
+		// return val, nil
 		return nil, nil
 	}
 
