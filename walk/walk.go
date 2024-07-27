@@ -170,7 +170,7 @@ func Walk(c *config.Config, cexts []config.Configurer, dirs []string, mode Mode,
 			}
 		}
 
-		update := !haveError && !wc.ignore && shouldUpdate
+		update := !haveError && !(wc.ignore || c.WalkIgnore) && shouldUpdate
 		if shouldCall(rel, mode, updateParent, updateRels) {
 			genFiles := findGenFiles(wc, f)
 			wf(dir, rel, c, update, f, subdirs, regularFiles, genFiles)

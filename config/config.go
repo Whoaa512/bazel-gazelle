@@ -107,6 +107,10 @@ type Config struct {
 
 	// Whether Gazelle is loaded as a Bzlmod 'bazel_dep'.
 	Bzlmod bool
+
+	// WalkIgnore specifies if the directory (and it's sub-directories) should
+	// be ignored by Gazelle when walking the tree.
+	WalkIgnore bool
 }
 
 // MappedKind describes a replacement to use for a built-in kind.

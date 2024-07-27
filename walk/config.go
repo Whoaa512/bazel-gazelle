@@ -80,7 +80,7 @@ func (cr *Configurer) Configure(c *config.Config, rel string, f *rule.File) {
 	wc := getWalkConfig(c)
 	wcCopy := &walkConfig{}
 	*wcCopy = *wc
-	wcCopy.ignore = false
+	wcCopy.ignore = c.WalkIgnore || wcCopy.ignore
 
 	wc.loadOnce.Do(func() {
 		if err := cr.loadBazelIgnore(c.RepoRoot, wcCopy); err != nil {
